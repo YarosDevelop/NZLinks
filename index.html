@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Градієнтний фон</title>
+    <title>Створення книги лінків</title>
     <style>
         @font-face {
             font-family: "CustomFont";
@@ -48,12 +48,12 @@
             max-width: calc(100% - 120px);
             margin-left: 100px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
         }
 
         .content {
-            margin-left: -20px; /* Двигаем текст ещё левее */
-            text-align: left; /* Выровнять текст по левому краю */
-            padding-left: 10px; /* Уменьшаем отступ внутри */
+            width: 70%;
         }
 
         .content h1 {
@@ -64,6 +64,49 @@
         .content p {
             font-size: 18px;
             line-height: 1.6;
+        }
+
+        .sidebar {
+            width: 25%;
+            padding: 20px;
+            background-color: #f1f1f1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar button {
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .form-container {
+            display: none;
+            flex-direction: column;
+        }
+
+        .form-container input,
+        .form-container button {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .links-container {
+            margin-top: 20px;
+        }
+
+        .link-item {
+            margin-bottom: 10px;
+        }
+
+        .link-item a {
+            color: #2575fc;
+            text-decoration: none;
         }
 
         .header-title {
@@ -81,25 +124,54 @@
         <p>nz links.ua</p>
     </div>
     <div class="main-content">
-        <div class="header-title">Лінки на 5-Б клас</div>
         <div class="content">
-            <h1>Лінки на уроки</h1>
-            <p>
-                Укр. мова: <a href="https://meet.google.com/bce-ccsm-jxx">https://meet.google.com/bce-ccsm-jxx</a><br>
-                Математ.: <a href="https://meet.google.com/hwh-wrup-xtm">https://meet.google.com/hwh-wrup-xtm</a><br>
-                Інформатика: <a href="https://meet.google.com/ooi-ejhb-grj">https://meet.google.com/ooi-ejhb-grj</a><br>
-                Англ. мова: <a href="https://meet.google.com/pnd-sbxf-cix">https://meet.google.com/pnd-sbxf-cix</a><br>
-                Укр. літ.: <a href="https://meet.google.com/bce-ccsm-jxx">https://meet.google.com/bce-ccsm-jxx</a><br>
-                Пізн. природу МПЗ: <a href="https://meet.google.com/vys-mtff-reu">https://meet.google.com/vys-mtff-reu</a><br>
-                Історія: <a href="https://meet.google.com/jdn-mcno-cje">https://meet.google.com/jdn-mcno-cje</a><br>
-                Фіз-ра: <a href="https://meet.google.com/oxp-ctop-iey">https://meet.google.com/oxp-ctop-iey</a><br>
-                Пізнаємо природу МФВ: <a href="https://meet.google.com/vys-mtff-reu">https://meet.google.com/vys-mtff-reu</a><br>
-                заруб. літ.: <a href="https://meet.google.com/bce-ccsm-jxx">https://meet.google.com/bce-ccsm-jxx</a><br>
-                Технології: <a href="https://meet.google.com/acv-qoxx-rzb">https://meet.google.com/acv-qoxx-rzb</a><br>
-                Мистецтво: <a href="https://meet.google.com/wos-gkfc-zwg">https://meet.google.com/wos-gkfc-zwg</a><br>
-                Безпека та добробут: <a href="https://meet.google.com/cyd-knxk-oix">https://meet.google.com/cyd-knxk-oix</a>
-            </p>
+            <div class="header-title">Розклад</div>
+            <div class="links-container" id="links-container">
+                <!-- Здесь будут добавляться сохраненные ссылки -->
+            </div>
+        </div>
+        <div class="sidebar">
+            <button id="createLinksBtn">Створити книгу лінків</button>
+            <div class="form-container" id="form-container">
+                <input type="text" id="lessonName" placeholder="Назва уроку">
+                <input type="url" id="lessonLink" placeholder="Посилання на урок">
+                <button id="saveLinkBtn">Зберегти лінк</button>
+            </div>
         </div>
     </div>
+
+    <script>
+        const createLinksBtn = document.getElementById('createLinksBtn');
+        const formContainer = document.getElementById('form-container');
+        const saveLinkBtn = document.getElementById('saveLinkBtn');
+        const linksContainer = document.getElementById('links-container');
+        const lessonNameInput = document.getElementById('lessonName');
+        const lessonLinkInput = document.getElementById('lessonLink');
+
+        createLinksBtn.addEventListener('click', () => {
+            formContainer.style.display = 'flex';
+        });
+
+        saveLinkBtn.addEventListener('click', () => {
+            const lessonName = lessonNameInput.value.trim();
+            const lessonLink = lessonLinkInput.value.trim();
+
+            if (lessonName && lessonLink) {
+                const linkItem = document.createElement('div');
+                linkItem.classList.add('link-item');
+                linkItem.innerHTML = `<strong>${lessonName}</strong>: <a href="${lessonLink}" target="_blank">${lessonLink}</a>`;
+                linksContainer.appendChild(linkItem);
+
+                // Очистить поля ввода после добавления
+                lessonNameInput.value = '';
+                lessonLinkInput.value = '';
+
+                // Скрыть форму после сохранения
+                formContainer.style.display = 'none';
+            } else {
+                alert('Будь ласка, заповніть всі поля');
+            }
+        });
+    </script>
 </body>
 </html>
