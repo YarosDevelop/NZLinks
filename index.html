@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Створення книги лінків</title>
+    <title>NZLinks.ua</title>
     <style>
         @font-face {
             font-family: "CustomFont";
@@ -141,6 +141,7 @@
     </div>
 
     <script>
+        // Получаем элементы из DOM
         const createLinksBtn = document.getElementById('createLinksBtn');
         const formContainer = document.getElementById('form-container');
         const saveLinkBtn = document.getElementById('saveLinkBtn');
@@ -148,19 +149,42 @@
         const lessonNameInput = document.getElementById('lessonName');
         const lessonLinkInput = document.getElementById('lessonLink');
 
+        // Загружаем сохраненные ссылки из localStorage
+        let links = JSON.parse(localStorage.getItem('links')) || [];
+
+        // Функция для обновления отображаемых ссылок
+        function updateLinks() {
+            linksContainer.innerHTML = '';
+            links.forEach(link => {
+                const linkItem = document.createElement('div');
+                linkItem.classList.add('link-item');
+                linkItem.innerHTML = `<strong>${link.name}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
+                linksContainer.appendChild(linkItem);
+            });
+        }
+
+        // Обновляем отображение при загрузке страницы
+        updateLinks();
+
+        // Открытие формы для добавления нового линка
         createLinksBtn.addEventListener('click', () => {
             formContainer.style.display = 'flex';
         });
 
+        // Сохранение линка в localStorage
         saveLinkBtn.addEventListener('click', () => {
             const lessonName = lessonNameInput.value.trim();
             const lessonLink = lessonLinkInput.value.trim();
 
             if (lessonName && lessonLink) {
-                const linkItem = document.createElement('div');
-                linkItem.classList.add('link-item');
-                linkItem.innerHTML = `<strong>${lessonName}</strong>: <a href="${lessonLink}" target="_blank">${lessonLink}</a>`;
-                linksContainer.appendChild(linkItem);
+                // Добавляем новый линк в массив
+                links.push({ name: lessonName, url: lessonLink });
+
+                // Сохраняем массив в localStorage
+                localStorage.setItem('links', JSON.stringify(links));
+
+                // Обновляем отображение ссылок
+                updateLinks();
 
                 // Очистить поля ввода после добавления
                 lessonNameInput.value = '';
