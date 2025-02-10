@@ -77,7 +77,7 @@
             background-color: #6a11cb;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 10px;
             font-size: 16px;
             cursor: pointer;
             width: 100%;
@@ -101,12 +101,36 @@
         }
 
         .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
             margin-bottom: 10px;
+            position: relative;
         }
 
         .link-item a {
             color: #2575fc;
             text-decoration: none;
+        }
+
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .link-item:hover .delete-btn {
+            display: block;
         }
 
         .header-title {
@@ -126,9 +150,7 @@
     <div class="main-content">
         <div class="content">
             <div class="header-title">Розклад</div>
-            <div class="links-container" id="links-container">
-                <!-- Здесь будут добавляться сохраненные ссылки -->
-            </div>
+            <div class="links-container" id="links-container"></div>
         </div>
         <div class="sidebar">
             <button id="createLinksBtn">Створити книгу лінків</button>
@@ -141,7 +163,6 @@
     </div>
 
     <script>
-        // Получаем элементы из DOM
         const createLinksBtn = document.getElementById('createLinksBtn');
         const formContainer = document.getElementById('form-container');
         const saveLinkBtn = document.getElementById('saveLinkBtn');
@@ -149,51 +170,47 @@
         const lessonNameInput = document.getElementById('lessonName');
         const lessonLinkInput = document.getElementById('lessonLink');
 
-        // Загружаем сохраненные ссылки из localStorage
         let links = JSON.parse(localStorage.getItem('links')) || [];
 
-        // Функция для обновления отображаемых ссылок
         function updateLinks() {
             linksContainer.innerHTML = '';
-            links.forEach(link => {
+            links.forEach((link, index) => {
                 const linkItem = document.createElement('div');
                 linkItem.classList.add('link-item');
-                linkItem.innerHTML = `<strong>${link.name}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
+                linkItem.innerHTML = `
+                    <strong>${link.name}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>
+                    <button class="delete-btn" data-index="${index}">Видалити</button>
+                `;
                 linksContainer.appendChild(linkItem);
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    links.splice(index, 1);
+                    localStorage.setItem('links', JSON.stringify(links));
+                    updateLinks();
+                });
             });
         }
 
-        // Обновляем отображение при загрузке страницы
         updateLinks();
 
-        // Открытие формы для добавления нового линка
         createLinksBtn.addEventListener('click', () => {
             formContainer.style.display = 'flex';
         });
 
-        // Сохранение линка в localStorage
         saveLinkBtn.addEventListener('click', () => {
             const lessonName = lessonNameInput.value.trim();
             const lessonLink = lessonLinkInput.value.trim();
 
             if (lessonName && lessonLink) {
-                // Добавляем новый линк в массив
                 links.push({ name: lessonName, url: lessonLink });
-
-                // Сохраняем массив в localStorage
                 localStorage.setItem('links', JSON.stringify(links));
-
-                // Обновляем отображение ссылок
                 updateLinks();
-
-                // Очистить поля ввода после добавления
                 lessonNameInput.value = '';
                 lessonLinkInput.value = '';
-
-                // Скрыть форму после сохранения
                 formContainer.style.display = 'none';
-            } else {
-                alert('Будь ласка, заповніть всі поля');
             }
         });
     </script>
