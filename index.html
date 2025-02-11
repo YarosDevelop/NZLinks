@@ -16,51 +16,26 @@
             background: linear-gradient(to bottom, #6a11cb, #2575fc, #b2fefa, #ffffff, #b2fefa);
         }
 
-        .ribbon {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 80px;
-            height: 100%;
-            background: linear-gradient(to bottom, #4d4d4d, #000000);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 0;
-        }
-
-        .ribbon img {
-            width: 50px;
-            height: auto;
-        }
-
-        .ribbon p {
-            color: #fff;
-            font-size: 14px;
-            text-align: center;
-            margin-top: 10px;
-        }
-
         .main-content {
             background: #fff;
             margin: 50px 0;
             padding: 20px;
-            max-width: calc(100% - 120px);
-            margin-left: 100px;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
         }
 
-        .content {
-            width: 70%;
+        .header-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 40px;
         }
 
         .sidebar {
-            width: 25%;
-            padding: 20px;
-            background-color: #f1f1f1;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
         }
 
         .sidebar button {
@@ -80,6 +55,7 @@
         }
 
         .form-container input,
+        .form-container select,
         .form-container button {
             margin-bottom: 10px;
             padding: 10px;
@@ -88,6 +64,19 @@
 
         .links-container {
             margin-top: 20px;
+        }
+
+        .day-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+
+        .day-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
         .link-item {
@@ -122,35 +111,31 @@
         .link-item:hover .delete-btn {
             display: block;
         }
-
-        .header-title {
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            margin-top: 20px;
-            margin-bottom: 40px;
-        }
     </style>
 </head>
 <body>
-    <div class="ribbon">
-        <img src="https://nz.ua/images/logo.svg" alt="NZ Links">
-        <p>nz links.ua</p>
-    </div>
     <div class="main-content">
-        <div class="content">
-            <div class="header-title">Розклад</div>
-            <div class="links-container" id="links-container"></div>
-        </div>
+        <div class="header-title">Розклад</div>
         <div class="sidebar">
-            <button id="createLinksBtn">Створити книгу лінків</button>
+            <button id="createLinksBtn">Створити урок</button>
             <div class="form-container" id="form-container">
                 <input type="text" id="lessonName" placeholder="Назва уроку">
                 <input type="url" id="lessonLink" placeholder="Посилання на урок">
+                <select id="lessonDay">
+                    <option value="Понеділок">Понеділок</option>
+                    <option value="Вівторок">Вівторок</option>
+                    <option value="Середа">Середа</option>
+                    <option value="Четвер">Четвер</option>
+                    <option value="П’ятниця">П’ятниця</option>
+                    <option value="Субота">Субота</option>
+                    <option value="Неділя">Неділя</option>
+                </select>
+                <input type="date" id="lessonDate">
                 <input type="time" id="lessonTime">
-                <button id="saveLinkBtn">Зберегти лінк</button>
+                <button id="saveLinkBtn">Зберегти урок</button>
             </div>
         </div>
+        <div class="links-container" id="links-container"></div>
     </div>
 
     <audio id="reminderSound" src="Napomin.mp3"></audio>
@@ -162,6 +147,8 @@
         const linksContainer = document.getElementById('links-container');
         const lessonNameInput = document.getElementById('lessonName');
         const lessonLinkInput = document.getElementById('lessonLink');
+        const lessonDayInput = document.getElementById('lessonDay');
+        const lessonDateInput = document.getElementById('lessonDate');
         const lessonTimeInput = document.getElementById('lessonTime');
         const reminderSound = document.getElementById('reminderSound');
 
@@ -169,15 +156,31 @@
 
         function updateLinks() {
             linksContainer.innerHTML = '';
-            links.forEach((link, index) => {
-                const linkItem = document.createElement('div');
-                linkItem.classList.add('link-item');
-                linkItem.innerHTML = `
-                    <strong>${link.name}</strong>: <a href="${link.url}" target="_blank">${link.url}</a> 
-                    <span> ⏰ ${link.time}</span>
-                    <button class="delete-btn" data-index="${index}">Видалити</button>
-                `;
-                linksContainer.appendChild(linkItem);
+
+            const days = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
+
+            days.forEach(day => {
+                const dayLinks = links.filter(link => link.day === day);
+
+                if (dayLinks.length > 0) {
+                    const section = document.createElement('div');
+                    section.classList.add('day-section');
+                    section.innerHTML = `<div class="day-title">${day}</div>`;
+
+                    dayLinks.forEach((link, index) => {
+                        const linkItem = document.createElement('div');
+                        linkItem.classList.add('link-item');
+                        linkItem.innerHTML = `
+                            <strong>${link.name}</strong> (${link.date}) 
+                            <a href="${link.url}" target="_blank">${link.url}</a>
+                            <span> ⏰ ${link.time}</span>
+                            <button class="delete-btn" data-index="${index}">Видалити</button>
+                        `;
+                        section.appendChild(linkItem);
+                    });
+
+                    linksContainer.appendChild(section);
+                }
             });
 
             document.querySelectorAll('.delete-btn').forEach(button => {
@@ -192,10 +195,11 @@
 
         function checkReminders() {
             const now = new Date();
+            const currentDate = now.toISOString().split('T')[0];
             const currentTime = now.toTimeString().slice(0, 5);
 
             links.forEach(link => {
-                if (link.time === currentTime) {
+                if (link.date === currentDate && link.time === currentTime) {
                     reminderSound.play();
                 }
             });
@@ -210,19 +214,17 @@
         });
 
         saveLinkBtn.addEventListener('click', () => {
-            const lessonName = lessonNameInput.value.trim();
-            const lessonLink = lessonLinkInput.value.trim();
-            const lessonTime = lessonTimeInput.value.trim();
+            links.push({
+                name: lessonNameInput.value.trim(),
+                url: lessonLinkInput.value.trim(),
+                day: lessonDayInput.value,
+                date: lessonDateInput.value,
+                time: lessonTimeInput.value
+            });
 
-            if (lessonName && lessonLink && lessonTime) {
-                links.push({ name: lessonName, url: lessonLink, time: lessonTime });
-                localStorage.setItem('links', JSON.stringify(links));
-                updateLinks();
-                lessonNameInput.value = '';
-                lessonLinkInput.value = '';
-                lessonTimeInput.value = '';
-                formContainer.style.display = 'none';
-            }
+            localStorage.setItem('links', JSON.stringify(links));
+            updateLinks();
+            formContainer.style.display = 'none';
         });
     </script>
 </body>
