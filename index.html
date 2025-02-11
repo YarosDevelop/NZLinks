@@ -56,16 +56,6 @@
             width: 70%;
         }
 
-        .content h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .content p {
-            font-size: 18px;
-            line-height: 1.6;
-        }
-
         .sidebar {
             width: 25%;
             padding: 20px;
@@ -157,10 +147,13 @@
             <div class="form-container" id="form-container">
                 <input type="text" id="lessonName" placeholder="Назва уроку">
                 <input type="url" id="lessonLink" placeholder="Посилання на урок">
+                <input type="time" id="lessonTime">
                 <button id="saveLinkBtn">Зберегти лінк</button>
             </div>
         </div>
     </div>
+
+    <audio id="reminderSound" src="Napomin.mp3"></audio>
 
     <script>
         const createLinksBtn = document.getElementById('createLinksBtn');
@@ -169,6 +162,8 @@
         const linksContainer = document.getElementById('links-container');
         const lessonNameInput = document.getElementById('lessonName');
         const lessonLinkInput = document.getElementById('lessonLink');
+        const lessonTimeInput = document.getElementById('lessonTime');
+        const reminderSound = document.getElementById('reminderSound');
 
         let links = JSON.parse(localStorage.getItem('links')) || [];
 
@@ -178,7 +173,8 @@
                 const linkItem = document.createElement('div');
                 linkItem.classList.add('link-item');
                 linkItem.innerHTML = `
-                    <strong>${link.name}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>
+                    <strong>${link.name}</strong>: <a href="${link.url}" target="_blank">${link.url}</a> 
+                    <span> ⏰ ${link.time}</span>
                     <button class="delete-btn" data-index="${index}">Видалити</button>
                 `;
                 linksContainer.appendChild(linkItem);
@@ -194,6 +190,19 @@
             });
         }
 
+        function checkReminders() {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+
+            links.forEach(link => {
+                if (link.time === currentTime) {
+                    reminderSound.play();
+                }
+            });
+        }
+
+        setInterval(checkReminders, 60000);
+
         updateLinks();
 
         createLinksBtn.addEventListener('click', () => {
@@ -203,13 +212,15 @@
         saveLinkBtn.addEventListener('click', () => {
             const lessonName = lessonNameInput.value.trim();
             const lessonLink = lessonLinkInput.value.trim();
+            const lessonTime = lessonTimeInput.value.trim();
 
-            if (lessonName && lessonLink) {
-                links.push({ name: lessonName, url: lessonLink });
+            if (lessonName && lessonLink && lessonTime) {
+                links.push({ name: lessonName, url: lessonLink, time: lessonTime });
                 localStorage.setItem('links', JSON.stringify(links));
                 updateLinks();
                 lessonNameInput.value = '';
                 lessonLinkInput.value = '';
+                lessonTimeInput.value = '';
                 formContainer.style.display = 'none';
             }
         });
